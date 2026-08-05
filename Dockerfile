@@ -2,7 +2,7 @@ FROM node:22-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -22,10 +22,24 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 comanga
-RUN adduser --system --uid 1001 comanga
+RUN apk add --no-cache python3 make g++ && \
+  addgroup --system --gid 1001 comanga && \
+  adduser --system --uid 1001 comanga
 
+# Copy standalone Next.js output
 COPY --from=builder /app/.next/standalone ./
+
+# Copy static assets (needed by standalone output)
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# Copy database init script and entrypoint
+COPY scripts/init-db.mjs ./scripts/init-db.mjs
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
+# Rebuild better-sqlite3 for the target architecture
+RUN npm rebuild better-sqlite3
 
 USER comanga
 
@@ -34,4 +48,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
