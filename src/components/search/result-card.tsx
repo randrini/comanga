@@ -73,7 +73,7 @@ function CoverPlaceholder({
   return (
     <div
       className={cn(
-        "flex items-center justify-center shrink-0 rounded-sm",
+        "flex items-center justify-center shrink-0 rounded-lg",
         className,
       )}
       style={{ backgroundColor: color }}
@@ -95,12 +95,12 @@ interface ResultCardProps {
 
 export function ResultCard({ result, added = false, onAdd }: ResultCardProps) {
   return (
-    <Card className="group flex gap-3 p-3 hover:border-accent/40 transition-colors duration-150">
+    <Card className="group flex gap-4 p-4 hover:border-accent/30 transition-all duration-200">
       {/* Cover */}
       <CoverPlaceholder
         title={result.title}
         color={result.coverColor}
-        className="h-[72px] w-[52px]"
+        className="h-[80px] w-[58px]"
       />
 
       {/* Info */}
@@ -110,7 +110,7 @@ export function ResultCard({ result, added = false, onAdd }: ResultCardProps) {
           <h3 className="text-sm font-semibold text-text-primary truncate leading-snug">
             {result.title}
           </h3>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Badge
               className={cn(
                 "text-[10px] px-1.5 py-0",
@@ -121,7 +121,7 @@ export function ResultCard({ result, added = false, onAdd }: ResultCardProps) {
             </Badge>
             <span
               className={cn(
-                "text-[10px] px-1.5 py-0 rounded-full border font-medium leading-none inline-flex items-center",
+                "text-[10px] px-1.5 py-0 rounded-md border font-medium leading-none inline-flex items-center",
                 SOURCE_COLORS[result.source],
               )}
             >
@@ -152,10 +152,10 @@ export function ResultCard({ result, added = false, onAdd }: ResultCardProps) {
           }}
           disabled={added}
           className={cn(
-            "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors",
+            "inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all duration-200",
             added
-              ? "bg-success/20 text-success cursor-default"
-              : "bg-accent text-white hover:bg-accent-hover",
+              ? "bg-success/15 text-success cursor-default"
+              : "bg-accent text-text-inverse hover:bg-accent-hover active:scale-95",
           )}
         >
           {added ? (

@@ -26,7 +26,7 @@ export function Header({ mobileMenuButton }: HeaderProps) {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-20 h-12 bg-bg-secondary border-b border-border flex items-center px-4 gap-3">
+    <header className="sticky top-0 z-20 h-12 bg-bg-secondary/80 backdrop-blur-sm border-b border-border/50 flex items-center px-4 gap-3 shadow-header">
       {/* Mobile menu button */}
       {mobileMenuButton}
 
@@ -39,10 +39,10 @@ export function Header({ mobileMenuButton }: HeaderProps) {
             )}
             <span
               className={cn(
-                "truncate",
+                "truncate transition-colors duration-150",
                 index === breadcrumbs.length - 1
                   ? "text-text-primary font-medium"
-                  : "hover:text-text-secondary transition-colors",
+                  : "hover:text-text-secondary",
               )}
             >
               {crumb.label}
@@ -52,27 +52,27 @@ export function Header({ mobileMenuButton }: HeaderProps) {
       </nav>
 
       {/* Right side actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
         {/* Global search */}
-        <div className="relative hidden sm:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
+        <div className="relative hidden sm:block group">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted group-focus-within:text-accent transition-colors duration-200" />
           <input
             type="text"
-            placeholder="Search..."
-            className="w-40 lg:w-56 h-7 pl-7 pr-2 text-xs bg-bg-primary border border-border rounded-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition-colors"
+            placeholder="Search series..."
+            className="w-40 lg:w-56 h-7 pl-8 pr-2.5 text-xs bg-bg-primary/60 border border-border/50 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:bg-bg-primary transition-all duration-200"
           />
         </div>
 
         {/* Notification bell */}
-        <button className="relative p-1.5 rounded text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors">
+        <button className="relative p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-all duration-200 group">
           <Bell className="h-4 w-4" />
-          <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-danger text-[9px] font-bold text-white leading-none">
+          <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-danger text-[9px] font-bold text-white leading-none animate-pulse-glow">
             3
           </span>
         </button>
 
         {/* Activity / download progress */}
-        <button className="relative p-1.5 rounded text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors">
+        <button className="relative p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-all duration-200 group">
           <Activity className="h-4 w-4" />
           <svg
             className="absolute -bottom-0.5 -right-0.5 h-3 w-3 -rotate-90"
@@ -96,7 +96,7 @@ export function Header({ mobileMenuButton }: HeaderProps) {
               strokeWidth="2"
               strokeDasharray="37.7"
               strokeDashoffset="15"
-              className="text-accent"
+              className="text-accent transition-all duration-500"
             />
           </svg>
         </button>

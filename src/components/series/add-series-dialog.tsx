@@ -54,7 +54,6 @@ export function AddSeriesDialog({
   const [rootFolder, setRootFolder] = useState("/data/comanga/");
   const [monitorType, setMonitorType] = useState<MonitorType>("all");
 
-  // Pre-fill from metadata when series changes
   useEffect(() => {
     if (series) {
       setTitle(series.title);
@@ -62,7 +61,6 @@ export function AddSeriesDialog({
     }
   }, [series]);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -87,13 +85,13 @@ export function AddSeriesDialog({
   };
 
   const selectClasses =
-    "w-full h-8 px-2.5 text-xs bg-bg-primary border border-border rounded-md text-text-primary focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer";
+    "w-full h-9 px-3 text-xs bg-bg-primary border border-border/50 rounded-lg text-text-primary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200 appearance-none cursor-pointer";
 
   const inputClasses =
-    "w-full h-8 px-2.5 text-xs bg-bg-primary border border-border rounded-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition-colors";
+    "w-full h-9 px-3 text-xs bg-bg-primary border border-border/50 rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -101,12 +99,12 @@ export function AddSeriesDialog({
       />
 
       {/* Dialog */}
-      <Card className="relative z-10 w-full max-w-md mx-4 shadow-2xl border-accent/20">
+      <Card className="relative z-10 w-full max-w-md mx-4 shadow-2xl border-accent/20 animate-in zoom-in-95 duration-200">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Add Series</CardTitle>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -186,7 +184,7 @@ export function AddSeriesDialog({
             </div>
 
             {/* Metadata source (read-only) */}
-            <div className="flex items-center gap-2 text-xs text-text-muted bg-bg-primary/50 rounded-md px-2.5 py-2 border border-border/50">
+            <div className="flex items-center gap-2 text-xs text-text-muted bg-bg-primary/50 rounded-lg px-3 py-2.5 border border-border/30">
               <span className="text-text-secondary">Source:</span>
               <span className="text-text-primary font-medium capitalize">
                 {series.source}
@@ -200,7 +198,7 @@ export function AddSeriesDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 h-8 text-xs font-medium bg-bg-hover text-text-secondary rounded-md hover:text-text-primary hover:bg-bg-surface transition-colors"
+                className="flex-1 h-9 text-xs font-medium bg-bg-hover text-text-secondary rounded-lg hover:text-text-primary hover:bg-bg-active transition-colors"
               >
                 Cancel
               </button>
@@ -208,10 +206,10 @@ export function AddSeriesDialog({
                 type="submit"
                 disabled={!title.trim()}
                 className={cn(
-                  "flex-1 h-8 text-xs font-medium rounded-md transition-colors",
+                  "flex-1 h-9 text-xs font-semibold rounded-lg transition-all duration-200",
                   title.trim()
-                    ? "bg-accent text-white hover:bg-accent-hover"
-                    : "bg-accent/30 text-text-muted cursor-not-allowed",
+                    ? "bg-accent text-text-inverse hover:bg-accent-hover active:scale-[0.98]"
+                    : "bg-accent/20 text-text-muted cursor-not-allowed",
                 )}
               >
                 Add Series

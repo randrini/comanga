@@ -14,11 +14,11 @@ import {
   LayoutGrid,
   List,
   Library,
+  BookOpen,
 } from "lucide-react";
 import type { MediaType, MetadataSource } from "@/types";
 
 // ─── Mock search results ─────────────────────────────────────────────────────
-// TODO: wire to metadata search tRPC
 
 const MOCK_RESULTS: SearchResult[] = [
   {
@@ -190,7 +190,6 @@ export default function SearchPage() {
   );
   const [toast, setToast] = useState<string | null>(null);
 
-  // Filter results
   const results = useMemo(() => {
     let filtered = MOCK_RESULTS;
 
@@ -214,32 +213,28 @@ export default function SearchPage() {
     return filtered;
   }, [query, mediaFilter, sourceFilter]);
 
-  // Handle "Add to Library" click — open dialog
   const handleAddClick = (result: SearchResult) => {
     setSelectedResult(result);
     setDialogOpen(true);
   };
 
-  // Handle confirm from dialog
   const handleAddConfirm = (input: AddSeriesInput) => {
     setAddedIds((prev) => new Set(prev).add(selectedResult!.id));
     setDialogOpen(false);
     setSelectedResult(null);
 
-    // Show toast
     setToast(`"${input.title}" added to library`);
     setTimeout(() => setToast(null), 3000);
   };
 
-  // List view columns
   const columns: Column<SearchResult>[] = [
     {
       key: "title",
       header: "Title",
       render: (row) => (
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div
-            className="h-8 w-6 rounded-sm shrink-0 flex items-center justify-center"
+            className="h-9 w-7 rounded-md shrink-0 flex items-center justify-center"
             style={{ backgroundColor: row.coverColor }}
           >
             <span className="text-white/80 font-bold text-[10px] select-none leading-none">
@@ -322,10 +317,10 @@ export default function SearchPage() {
             }}
             disabled={added}
             className={cn(
-              "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md transition-colors",
+              "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200",
               added
-                ? "bg-success/20 text-success cursor-default"
-                : "bg-accent text-white hover:bg-accent-hover",
+                ? "bg-success/15 text-success cursor-default"
+                : "bg-accent text-text-inverse hover:bg-accent-hover active:scale-95",
             )}
           >
             {added ? "Added" : "Add"}
@@ -338,22 +333,22 @@ export default function SearchPage() {
   return (
     <div className="p-4 lg:p-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold text-text-primary">
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-xl font-semibold text-text-primary">
           Add Series
         </h1>
       </div>
 
       {/* Search bar */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="relative flex-1 max-w-2xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="relative flex-1 max-w-2xl group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted group-focus-within:text-accent transition-colors duration-200" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a series to add to your library..."
-            className="w-full h-10 pl-9 pr-4 text-sm bg-bg-secondary border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 transition-colors"
+            className="w-full h-11 pl-10 pr-4 text-sm bg-bg-surface border border-border/50 rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200"
             autoFocus
           />
         </div>
@@ -362,7 +357,7 @@ export default function SearchPage() {
         <select
           value={mediaFilter}
           onChange={(e) => setMediaFilter(e.target.value as MediaType | "all")}
-          className="h-10 px-3 text-xs bg-bg-secondary border border-border rounded-lg text-text-primary focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer"
+          className="h-11 px-3.5 text-xs bg-bg-surface border border-border/50 rounded-xl text-text-primary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200 appearance-none cursor-pointer"
         >
           <option value="all">All Types</option>
           <option value="manga">Manga</option>
@@ -378,7 +373,7 @@ export default function SearchPage() {
           onChange={(e) =>
             setSourceFilter(e.target.value as MetadataSource | "all")
           }
-          className="h-10 px-3 text-xs bg-bg-secondary border border-border rounded-lg text-text-primary focus:outline-none focus:border-accent/50 transition-colors appearance-none cursor-pointer"
+          className="h-11 px-3.5 text-xs bg-bg-surface border border-border/50 rounded-xl text-text-primary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200 appearance-none cursor-pointer"
         >
           <option value="all">All Sources</option>
           <option value="comicvine">ComicVine</option>
@@ -389,16 +384,16 @@ export default function SearchPage() {
       </div>
 
       {/* Results bar */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-5">
         {/* View toggle */}
-        <div className="flex rounded-md border border-border overflow-hidden">
+        <div className="flex rounded-lg border border-border/50 overflow-hidden bg-bg-surface/50">
           <button
             onClick={() => setViewMode("list")}
             className={cn(
-              "p-1.5 text-xs transition-colors",
+              "p-2 text-xs transition-all duration-200",
               viewMode === "list"
-                ? "bg-accent/20 text-accent"
-                : "text-text-muted hover:text-text-primary hover:bg-bg-hover",
+                ? "bg-accent/15 text-accent"
+                : "text-text-muted hover:text-text-primary hover:bg-bg-hover/50",
             )}
           >
             <List className="h-3.5 w-3.5" />
@@ -406,17 +401,17 @@ export default function SearchPage() {
           <button
             onClick={() => setViewMode("grid")}
             className={cn(
-              "p-1.5 text-xs transition-colors",
+              "p-2 text-xs transition-all duration-200",
               viewMode === "grid"
-                ? "bg-accent/20 text-accent"
-                : "text-text-muted hover:text-text-primary hover:bg-bg-hover",
+                ? "bg-accent/15 text-accent"
+                : "text-text-muted hover:text-text-primary hover:bg-bg-hover/50",
             )}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        <span className="text-xs text-text-muted ml-auto">
+        <span className="text-xs text-text-muted ml-auto tabular-nums">
           {results.length} result{results.length !== 1 ? "s" : ""}
         </span>
       </div>
@@ -424,29 +419,29 @@ export default function SearchPage() {
       {/* Results */}
       {results.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="h-16 w-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center mb-4">
+          <div className="h-20 w-20 rounded-2xl bg-bg-surface border border-border/50 flex items-center justify-center mb-5">
             {query.trim() ? (
-              <Search className="h-6 w-6 text-text-muted" />
+              <Search className="h-8 w-8 text-text-muted" />
             ) : (
-              <Library className="h-6 w-6 text-text-muted" />
+              <BookOpen className="h-8 w-8 text-text-muted" />
             )}
           </div>
           {query.trim() ? (
             <>
-              <h2 className="text-sm font-medium text-text-primary mb-1">
+              <h2 className="text-base font-semibold text-text-primary mb-1.5">
                 No results found
               </h2>
-              <p className="text-xs text-text-muted max-w-sm">
+              <p className="text-sm text-text-muted max-w-sm">
                 No series matched &ldquo;{query}&rdquo;. Try a different search
                 term or adjust your filters.
               </p>
             </>
           ) : (
             <>
-              <h2 className="text-sm font-medium text-text-primary mb-1">
+              <h2 className="text-base font-semibold text-text-primary mb-1.5">
                 Search for a series
               </h2>
-              <p className="text-xs text-text-muted max-w-sm">
+              <p className="text-sm text-text-muted max-w-sm">
                 Search across metadata sources to find and add a new series to
                 your library.
               </p>
@@ -454,7 +449,7 @@ export default function SearchPage() {
           )}
         </div>
       ) : viewMode === "list" ? (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border/50 rounded-xl overflow-hidden">
           <DataTable
             columns={columns}
             data={results}
@@ -462,8 +457,7 @@ export default function SearchPage() {
           />
         </div>
       ) : (
-        /* Grid view — stacked result cards */
-        <div className="space-y-2">
+        <div className="space-y-3">
           {results.map((result) => (
             <ResultCard
               key={result.id}
@@ -485,10 +479,10 @@ export default function SearchPage() {
 
       {/* Toast notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-bg-secondary border border-success/30 rounded-lg shadow-lg">
-            <span className="flex h-2 w-2 rounded-full bg-success" />
-            <span className="text-xs text-text-primary">{toast}</span>
+        <div className="fixed bottom-6 right-6 z-50 animate-slide-in-right">
+          <div className="flex items-center gap-2.5 px-4 py-3 bg-bg-surface border border-success/20 rounded-xl shadow-elevated">
+            <span className="flex h-2 w-2 rounded-full bg-success shadow-[0_0_6px_#22c55e]" />
+            <span className="text-sm text-text-primary">{toast}</span>
           </div>
         </div>
       )}

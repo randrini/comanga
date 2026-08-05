@@ -12,12 +12,12 @@ type BadgeVariant =
   | "pending";
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-bg-hover text-text-secondary",
-  success: "bg-success/20 text-success",
-  warning: "bg-warning/20 text-warning",
-  danger: "bg-danger/20 text-danger",
-  info: "bg-info/20 text-info",
-  pending: "bg-accent/20 text-accent",
+  default: "bg-bg-hover text-text-secondary border border-border/50",
+  success: "bg-success/15 text-success border border-success/20",
+  warning: "bg-warning/15 text-warning border border-warning/20",
+  danger: "bg-danger/15 text-danger border border-danger/20",
+  info: "bg-info/15 text-info border border-info/20",
+  pending: "bg-accent/15 text-accent border border-accent/20",
 };
 
 interface BadgeProps {
@@ -34,7 +34,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full leading-none",
+        "inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md leading-none transition-colors duration-150",
         variantStyles[variant],
         className,
       )}

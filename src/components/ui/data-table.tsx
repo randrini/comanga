@@ -42,7 +42,7 @@ export function DataTable<T>({
               <th
                 key={col.key}
                 className={cn(
-                  "px-3 py-2 text-left text-xs font-medium text-text-muted uppercase tracking-wider bg-bg-secondary border-b border-border",
+                  "px-4 py-2.5 text-left text-[11px] font-semibold text-text-muted uppercase tracking-wider bg-bg-surface border-b border-border/50",
                   col.className,
                 )}
               >
@@ -51,21 +51,21 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-border/30">
           {data.map((row, index) => (
             <tr
               key={getRowKey(row)}
               onClick={() => onRowClick?.(row)}
               className={cn(
-                index % 2 === 0 ? "bg-bg-primary" : "bg-bg-primary/50",
+                "transition-colors duration-100",
                 onRowClick &&
-                  "cursor-pointer hover:bg-bg-hover transition-colors duration-100",
+                  "cursor-pointer hover:bg-bg-hover/60",
               )}
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={cn("px-3 py-2 text-text-primary", col.className)}
+                  className={cn("px-4 py-2.5 text-text-primary", col.className)}
                 >
                   {col.render(row)}
                 </td>

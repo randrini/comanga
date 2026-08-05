@@ -13,6 +13,7 @@ import {
   Plus,
   Search,
   RefreshCw,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import type { MediaType } from "@/lib/utils";
@@ -52,12 +53,12 @@ function coverColorFromId(id: string): string {
 
 function SeriesGridSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-lg border border-border overflow-hidden">
+        <div key={i} className="rounded-xl border border-border/50 overflow-hidden bg-bg-surface">
           <Skeleton className="aspect-[3/4] rounded-none" />
-          <div className="p-2.5 space-y-1.5">
-            <Skeleton className="h-3 w-3/4" />
+          <div className="p-3 space-y-2">
+            <Skeleton className="h-3.5 w-3/4" />
             <Skeleton className="h-2.5 w-1/2" />
           </div>
         </div>
@@ -68,19 +69,19 @@ function SeriesGridSkeleton() {
 
 function SeriesListSkeleton() {
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
-      <div className="divide-y divide-border">
+    <div className="border border-border/50 rounded-xl overflow-hidden">
+      <div className="divide-y divide-border/30">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 px-3 py-2.5">
-            <Skeleton className="h-8 w-6 rounded-sm shrink-0" />
-            <div className="flex-1 space-y-1">
+          <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="h-9 w-7 rounded-md shrink-0" />
+            <div className="flex-1 space-y-1.5">
               <Skeleton className="h-3.5 w-48" />
               <Skeleton className="h-2.5 w-16" />
             </div>
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-12" />
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-5 w-16 rounded-md" />
+            <Skeleton className="h-5 w-12 rounded-md" />
+            <Skeleton className="h-5 w-16 rounded-md" />
+            <Skeleton className="h-5 w-20 rounded-md" />
           </div>
         ))}
       </div>
@@ -133,7 +134,6 @@ export default function SeriesPage() {
     } else if (sortBy === "recent") {
       items.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
     } else if (sortBy === "progress") {
-      // Sort by volume count descending as a proxy for progress
       items.sort((a, b) => (b.volumeCount ?? 0) - (a.volumeCount ?? 0));
     }
     return items;
@@ -146,11 +146,15 @@ export default function SeriesPage() {
       key: "title",
       header: "Title",
       render: (row) => (
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div
-            className="h-8 w-6 rounded-sm shrink-0"
+            className="h-9 w-7 rounded-md shrink-0 flex items-center justify-center"
             style={{ backgroundColor: coverColorFromId(row.id) }}
-          />
+          >
+            <span className="text-white/80 font-bold text-[10px] select-none leading-none">
+              {row.title.charAt(0)}
+            </span>
+          </div>
           <div className="min-w-0">
             <div className="text-sm font-medium text-text-primary truncate">
               {row.title}
@@ -165,7 +169,7 @@ export default function SeriesPage() {
     {
       key: "mediaType",
       header: "Type",
-      className: "w-24",
+      className: "w-28",
       render: (row) => (
         <Badge variant="default">
           {mediaTypeLabels[row.mediaType as MediaType] ?? row.mediaType}
@@ -177,7 +181,7 @@ export default function SeriesPage() {
       header: "Volumes",
       className: "w-20",
       render: (row) => (
-        <span className="text-text-secondary text-xs">
+        <span className="text-text-secondary text-xs tabular-nums">
           {row.volumeCount ?? 0}
         </span>
       ),
@@ -211,11 +215,11 @@ export default function SeriesPage() {
   return (
     <div className="p-4 lg:p-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold text-text-primary">Series</h1>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-xl font-semibold text-text-primary">Series</h1>
         <Link
           href="/search"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-accent text-text-inverse rounded-lg hover:bg-accent-hover transition-all duration-200 shadow-glow"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Series
@@ -223,18 +227,18 @@ export default function SeriesPage() {
       </div>
 
       {/* Filters bar */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
         {/* View toggle */}
-        <div className="flex rounded-md border border-border overflow-hidden">
+        <div className="flex rounded-lg border border-border/50 overflow-hidden bg-bg-surface/50">
           <button
             onClick={() => {
               setLocalViewMode("grid");
               updateParams({ view: "grid" });
             }}
-            className={`p-1.5 text-xs transition-colors ${
+            className={`p-2 text-xs transition-all duration-200 ${
               localViewMode === "grid"
-                ? "bg-accent/20 text-accent"
-                : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
+                ? "bg-accent/15 text-accent"
+                : "text-text-muted hover:text-text-primary hover:bg-bg-hover/50"
             }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
@@ -244,10 +248,10 @@ export default function SeriesPage() {
               setLocalViewMode("list");
               updateParams({ view: "list" });
             }}
-            className={`p-1.5 text-xs transition-colors ${
+            className={`p-2 text-xs transition-all duration-200 ${
               localViewMode === "list"
-                ? "bg-accent/20 text-accent"
-                : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
+                ? "bg-accent/15 text-accent"
+                : "text-text-muted hover:text-text-primary hover:bg-bg-hover/50"
             }`}
           >
             <List className="h-3.5 w-3.5" />
@@ -262,7 +266,7 @@ export default function SeriesPage() {
             setLocalSort(val);
             updateParams({ sort: val });
           }}
-          className="h-7 px-2 text-xs bg-bg-primary border border-border rounded-md text-text-primary focus:outline-none focus:border-accent/50"
+          className="h-8 px-3 text-xs bg-bg-surface border border-border/50 rounded-lg text-text-primary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200 cursor-pointer"
         >
           <option value="title">Sort: Title</option>
           <option value="recent">Sort: Recent</option>
@@ -277,7 +281,7 @@ export default function SeriesPage() {
             setLocalMediaFilter(val);
             updateParams({ mediaType: val });
           }}
-          className="h-7 px-2 text-xs bg-bg-primary border border-border rounded-md text-text-primary focus:outline-none focus:border-accent/50"
+          className="h-8 px-3 text-xs bg-bg-surface border border-border/50 rounded-lg text-text-primary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200 cursor-pointer"
         >
           <option value="all">All Types</option>
           <option value="manga">Manga</option>
@@ -287,7 +291,7 @@ export default function SeriesPage() {
           <option value="novel">Novel</option>
         </select>
 
-        <span className="text-xs text-text-muted ml-auto">
+        <span className="text-xs text-text-muted ml-auto tabular-nums">
           {data?.total ?? 0} series
         </span>
       </div>
@@ -301,18 +305,18 @@ export default function SeriesPage() {
         )
       ) : isError ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="h-16 w-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center mb-4">
-            <RefreshCw className="h-6 w-6 text-text-muted" />
+          <div className="h-16 w-16 rounded-2xl bg-bg-surface border border-border/50 flex items-center justify-center mb-5">
+            <RefreshCw className="h-7 w-7 text-text-muted" />
           </div>
-          <h2 className="text-sm font-medium text-text-primary mb-1">
+          <h2 className="text-base font-semibold text-text-primary mb-1.5">
             Failed to load series
           </h2>
-          <p className="text-xs text-text-muted mb-4 max-w-sm">
+          <p className="text-sm text-text-muted mb-5 max-w-sm">
             {error?.message ?? "An unexpected error occurred."}
           </p>
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-text-inverse rounded-lg hover:bg-accent-hover transition-all duration-200"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -320,19 +324,19 @@ export default function SeriesPage() {
         </div>
       ) : sorted.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="h-16 w-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center mb-4">
-            <Search className="h-6 w-6 text-text-muted" />
+          <div className="h-20 w-20 rounded-2xl bg-bg-surface border border-border/50 flex items-center justify-center mb-5">
+            <BookOpen className="h-8 w-8 text-text-muted" />
           </div>
-          <h2 className="text-sm font-medium text-text-primary mb-1">
+          <h2 className="text-base font-semibold text-text-primary mb-1.5">
             No series yet
           </h2>
-          <p className="text-xs text-text-muted mb-4 max-w-sm">
+          <p className="text-sm text-text-muted mb-5 max-w-sm">
             Add your first series to get started. Comanga will automatically
             monitor and download new releases.
           </p>
           <Link
             href="/search"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-text-inverse rounded-lg hover:bg-accent-hover transition-all duration-200 shadow-glow"
           >
             <Plus className="h-4 w-4" />
             Add Your First Series
@@ -340,44 +344,44 @@ export default function SeriesPage() {
         </div>
       ) : localViewMode === "grid" ? (
         /* Grid view */
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 stagger-children">
           {sorted.map((series) => (
             <Link key={series.id} href={`/series/${series.id}`}>
-              <Card className="group cursor-pointer overflow-hidden">
+              <Card className="group cursor-pointer overflow-hidden h-full">
                 {/* Cover */}
                 <div
                   className="aspect-[3/4] relative"
                   style={{ backgroundColor: coverColorFromId(series.id) }}
                 >
                   {/* Overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
                   {/* Title overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
                     <h3 className="text-sm font-semibold text-white leading-tight line-clamp-2">
                       {series.title}
                     </h3>
                   </div>
 
                   {/* Badges */}
-                  <div className="absolute top-2 left-2 flex gap-1">
-                    <Badge variant="default" className="!bg-black/60 !text-white !border-0">
+                  <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-black/50 text-white/90 backdrop-blur-sm">
                       {mediaTypeLabels[series.mediaType as MediaType] ?? series.mediaType}
-                    </Badge>
+                    </span>
                   </div>
                   {series.monitored ? (
-                    <div className="absolute top-2 right-2">
-                      <span className="flex h-2 w-2 rounded-full bg-success" />
+                    <div className="absolute top-2.5 right-2.5">
+                      <span className="flex h-2 w-2 rounded-full bg-success shadow-[0_0_6px_#22c55e]" />
                     </div>
                   ) : null}
                 </div>
 
                 {/* Footer info */}
-                <div className="px-2.5 py-2 flex items-center justify-between">
-                  <span className="text-xs text-text-muted">
+                <div className="px-3 py-2.5 flex items-center justify-between">
+                  <span className="text-[11px] text-text-muted tabular-nums">
                     {series.volumeCount ?? 0} vols
                   </span>
-                  <span className="text-xs text-text-muted">
+                  <span className="text-[11px] text-text-muted">
                     {statusLabels[series.status ?? "unknown"]}
                   </span>
                 </div>
@@ -387,7 +391,7 @@ export default function SeriesPage() {
         </div>
       ) : (
         /* List view */
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border/50 rounded-xl overflow-hidden">
           <DataTable
             columns={columns}
             data={sorted}
