@@ -1,0 +1,111 @@
+# Comanga — Docker Compose
+# https://github.com/randrini/comanga
+#
+# Quick start:
+#   cp .env.example .env
+#   docker compose up -d
+#
+# Use GHCR image (default):
+#   docker compose up -d
+#
+# Build locally:
+#   docker compose -f compose.yaml -f compose.build.yaml up -d
+
+services:
+  comanga:
+    image: ghcr.io/randrini/comanga:latest
+    container_name: comanga
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - comanga-data:/app/data
+      - ${MEDIA_ROOT:-./media}:/media:rw
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=/app/data/comanga.db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: comanga-redis
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── Optional companion services ──────────────────────────────────────────
+  # Uncomment the ones you need. All share the same media volume.
+
+  slskd:
+    image: slskd/slskd:latest
+    container_name: comanga-slskd
+    profiles: [full, slskd]
+    ports:
+      - "5030:5030"
+      - "5031:5031"
+    volumes:
+      - slskd-data:/app
+      - ${MEDIA_ROOT:-./media}:/downloads:rw
+    environment:
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - SLSKD_API_KEY=${SLSKD_API_KEY:-}
+    restart: unless-stopped
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    container_name: comanga-prowlarr
+    profiles: [full, prowlarr]
+    ports:
+      - "9696:9696"
+    volumes:
+      - prowlarr-config:/config
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    restart: unless-stopped
+
+  qbittorrent:
+    image: ghcr.io/hotio/qbittorrent:latest
+    container_name: comanga-qbittorrent
+    profiles: [full, qbittorrent]
+    ports:
+      - "8080:8080"
+    volumes:
+      - qbittorrent-config:/config
+      - ${MEDIA_ROOT:-./media}:/downloads:rw
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    restart: unless-stopped
+
+  sabnzbd:
+    image: ghcr.io/hotio/sabnzbd:latest
+    container_name: comanga-sabnzbd
+    profiles: [full, sabnzbd]
+    ports:
+      - "8081:8080"
+    volumes:
+      - sabnzbd-config:/config
+      - ${MEDIA_ROOT:-./media}:/downloads:rw
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    restart: unless-stopped
+
+volumes:
+  comanga-data:
+  redis-data:
+  slskd-data:
+  prowlarr-config:
+  qbittorrent-config:
+  sabnzbd-config:
