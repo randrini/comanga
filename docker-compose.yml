@@ -1,0 +1,107 @@
+version: "3.8"
+
+services:
+  comanga:
+    build: .
+    container_name: comanga
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - comanga-data:/app/data
+      - ${MEDIA_ROOT:-/media/comics}:/media:rw
+    environment:
+      - DATABASE_URL=/app/data/comanga.db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - SLSKD_URL=${SLSKD_URL:-http://slskd:5030}
+      - SLSKD_API_KEY=${SLSKD_API_KEY}
+      - PROWLARR_URL=${PROWLARR_URL:-http://prowlarr:9696}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
+      - QBITTORRENT_URL=${QBITTORRENT_URL:-http://qbittorrent:8080}
+      - QBITTORRENT_USERNAME=${QBITTORRENT_USERNAME:-admin}
+      - QBITTORRENT_PASSWORD=${QBITTORRENT_PASSWORD}
+      - SABNZBD_URL=${SABNZBD_URL:-http://sabnzbd:8080}
+      - SABNZBD_API_KEY=${SABNZBD_API_KEY}
+      - COMICVINE_API_KEY=${COMICVINE_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: comanga-redis
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional: SLSKD (Soulseek client)
+  # slskd:
+  #   image: slskd/slskd:latest
+  #   container_name: slskd
+  #   ports:
+  #     - "5030:5030"
+  #   volumes:
+  #     - slskd-data:/slskd
+  #     - ${MEDIA_ROOT:-/media/comics}:/downloads:rw
+  #   environment:
+  #     - SLSKD_API_KEY=${SLSKD_API_KEY}
+  #   restart: unless-stopped
+
+  # Optional: Prowlarr (indexer manager)
+  # prowlarr:
+  #   image: ghcr.io/hotio/prowlarr:latest
+  #   container_name: prowlarr
+  #   ports:
+  #     - "9696:9696"
+  #   volumes:
+  #     - prowlarr-config:/config
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #   restart: unless-stopped
+
+  # Optional: qBittorrent
+  # qbittorrent:
+  #   image: ghcr.io/hotio/qbittorrent:latest
+  #   container_name: qbittorrent
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - qbittorrent-config:/config
+  #     - ${MEDIA_ROOT:-/media/comics}:/downloads:rw
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #   restart: unless-stopped
+
+  # Optional: SABnzbd
+  # sabnzbd:
+  #   image: ghcr.io/hotio/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   ports:
+  #     - "8081:8080"
+  #   volumes:
+  #     - sabnzbd-config:/config
+  #     - ${MEDIA_ROOT:-/media/comics}:/downloads:rw
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #   restart: unless-stopped
+
+volumes:
+  comanga-data:
+  redis-data:
+  # slskd-data:
+  # prowlarr-config:
+  # qbittorrent-config:
+  # sabnzbd-config:
