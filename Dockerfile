@@ -22,8 +22,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN apk add --no-cache python3 make g++ && \
-  addgroup --system --gid 1001 comanga && \
+RUN addgroup --system --gid 1001 comanga && \
   adduser --system --uid 1001 comanga
 
 # Copy standalone Next.js output
@@ -36,9 +35,6 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY scripts/init-db.mjs ./scripts/init-db.mjs
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
-
-# Rebuild better-sqlite3 for the target architecture
-RUN npm rebuild better-sqlite3
 
 USER comanga
 
