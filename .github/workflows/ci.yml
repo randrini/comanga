@@ -111,10 +111,6 @@ jobs:
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           SHA="${{ github.sha }}"
 
-          # Pull both architecture images to ensure they exist
-          docker pull "${IMAGE}:latest-amd64"
-          docker pull "${IMAGE}:latest-arm64"
-
           # Create and push multi-arch manifest for :latest
           docker buildx imagetools create \
             -t "${IMAGE}:latest" \
