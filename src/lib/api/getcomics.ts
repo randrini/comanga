@@ -14,11 +14,11 @@ export class GetComicsClient implements DownloadClient {
     this.enabled = process.env.GETCOMICS_ENABLED === 'true';
   }
 
-  async search(query: string, _options?: SearchOptions): Promise<SearchResult[]> {
+  async search(_query: string, _options?: SearchOptions): Promise<SearchResult[]> {
     throw new Error('Not implemented: getcomics.search');
   }
 
-  async addDownload(url: string, _options?: DownloadOptions): Promise<string> {
+  async addDownload(_url: string, _options?: DownloadOptions): Promise<string> {
     throw new Error('Not implemented: getcomics.addDownload');
   }
 
@@ -48,11 +48,11 @@ export class GetComicsClient implements DownloadClient {
 
   // GetComics-specific methods
 
-  async searchComics(query: string): Promise<unknown> {
+  async searchComics(_query: string): Promise<unknown> {
     throw new Error('Not implemented: getcomics.searchComics');
   }
 
-  async parsePage(url: string): Promise<unknown> {
+  async parsePage(_url: string): Promise<unknown> {
     throw new Error('Not implemented: getcomics.parsePage');
   }
 }

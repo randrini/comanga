@@ -18,11 +18,11 @@ export class QbittorrentClient implements DownloadClient {
     this.password = process.env.QBITTORRENT_PASSWORD ?? '';
   }
 
-  async search(query: string, _options?: SearchOptions): Promise<SearchResult[]> {
+  async search(_query: string, _options?: SearchOptions): Promise<SearchResult[]> {
     throw new Error('Not implemented: qbittorrent.search');
   }
 
-  async addDownload(url: string, _options?: DownloadOptions): Promise<string> {
+  async addDownload(_url: string, _options?: DownloadOptions): Promise<string> {
     throw new Error('Not implemented: qbittorrent.addDownload');
   }
 

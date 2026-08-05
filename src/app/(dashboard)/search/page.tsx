@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { ResultCard, type SearchResult } from "@/components/search/result-card";
 import {
@@ -14,7 +13,6 @@ import {
   Search,
   LayoutGrid,
   List,
-  SlidersHorizontal,
   Library,
 } from "lucide-react";
 import type { MediaType, MetadataSource } from "@/types";

@@ -10,7 +10,7 @@ import {
   downloadSource,
   settings,
 } from "@/lib/db/schema";
-import { eq, and, or, like, desc, asc, sql, count } from "drizzle-orm";
+import { eq, and, desc, asc, sql, count } from "drizzle-orm";
 import { slugify } from "@/lib/utils";
 import crypto from "crypto";
 

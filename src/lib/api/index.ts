@@ -19,8 +19,6 @@ export { ComicsCodeClient, comicscode } from './comicscode';
 import type { DownloaderType } from './types';
 import { slskd } from './slskd';
 import { prowlarr } from './prowlarr';
-import { qbittorrent } from './qbittorrent';
-import { sabnzbd } from './sabnzbd';
 import { getcomics } from './getcomics';
 import { comicscode } from './comicscode';
 

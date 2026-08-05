@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
-import { metadataCache as metadataCacheTable } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { db as _db } from '@/lib/db';
+import { metadataCache as _metadataCacheTable } from '@/lib/db/schema';
+import { eq as _eq, and as _and } from 'drizzle-orm';
 import type { MetadataSource } from './types';
 
 export class MetadataCache {

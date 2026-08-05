@@ -7,10 +7,6 @@ import {
   Pause,
   Play,
   Trash2,
-  Download,
-  Clock,
-  AlertCircle,
-  CheckCircle,
 } from "lucide-react";
 import type { DownloadStatus } from "@/lib/utils";
 

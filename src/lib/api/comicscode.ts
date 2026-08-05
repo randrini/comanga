@@ -14,11 +14,11 @@ export class ComicsCodeClient implements DownloadClient {
     this.enabled = process.env.COMICSCODE_ENABLED === 'true';
   }
 
-  async search(query: string, _options?: SearchOptions): Promise<SearchResult[]> {
+  async search(_query: string, _options?: SearchOptions): Promise<SearchResult[]> {
     throw new Error('Not implemented: comicscode.search');
   }
 
-  async addDownload(url: string, _options?: DownloadOptions): Promise<string> {
+  async addDownload(_url: string, _options?: DownloadOptions): Promise<string> {
     throw new Error('Not implemented: comicscode.addDownload');
   }
 

@@ -3,9 +3,6 @@ import {
   downloadQueue,
   metadataQueue,
   maintenanceQueue,
-  DOWNLOAD_QUEUE,
-  METADATA_QUEUE,
-  MAINTENANCE_QUEUE,
 } from "@/lib/queue/queues";
 import { downloadWorker } from "@/lib/queue/workers/download-worker";
 import { metadataWorker } from "@/lib/queue/workers/metadata-worker";

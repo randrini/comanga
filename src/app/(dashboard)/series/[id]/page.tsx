@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   ArrowLeft,
   Search,
@@ -16,7 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import type { DownloadStatus, MediaType } from "@/lib/utils";
+import type { DownloadStatus } from "@/lib/utils";
 
 // ─── Mock data ───────────────────────────────────────────────────────────────
 

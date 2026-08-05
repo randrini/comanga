@@ -16,11 +16,11 @@ export class ProwlarrClient implements DownloadClient {
     this.apiKey = process.env.PROWLARR_API_KEY ?? '';
   }
 
-  async search(query: string, _options?: SearchOptions): Promise<SearchResult[]> {
+  async search(_query: string, _options?: SearchOptions): Promise<SearchResult[]> {
     throw new Error('Not implemented: prowlarr.search');
   }
 
-  async addDownload(url: string, _options?: DownloadOptions): Promise<string> {
+  async addDownload(_url: string, _options?: DownloadOptions): Promise<string> {
     throw new Error('Not implemented: prowlarr.addDownload');
   }
 

@@ -10,20 +10,15 @@
  */
 
 import { db } from "@/lib/db";
-import { download, downloadSource, series } from "@/lib/db/schema";
+import { download } from "@/lib/db/schema";
 import { eq, and, lt, sql } from "drizzle-orm";
 import {
-  TRANSITIONS,
   canTransition,
   transition,
   shouldRetry,
-  getNextAttemptDelay,
-  isActive,
-  isTerminal,
   type DownloadStatus,
   type LifecycleState,
 } from "./lifecycle";
-import { getDownloader } from "@/lib/api";
 import { addDownloadJob } from "@/lib/queue";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -55,7 +50,7 @@ export class DownloadEngine {
    * 5. Initiate download via the selected downloader
    * 6. Update download status to 'downloading'
    */
-  async processPending(downloadId: string): Promise<void> {
+  async processPending(_downloadId: string): Promise<void> {
     // TODO: Implement with real downloader calls
     throw new Error("Not implemented: DownloadEngine.processPending");
   }
@@ -68,7 +63,7 @@ export class DownloadEngine {
    * 3. Update progress in DB
    * 4. If complete, transition to 'verifying'
    */
-  async checkProgress(downloadId: string): Promise<void> {
+  async checkProgress(_downloadId: string): Promise<void> {
     // TODO: Implement
     throw new Error("Not implemented: DownloadEngine.checkProgress");
   }
@@ -81,7 +76,7 @@ export class DownloadEngine {
    * 3. If valid, transition to 'importing'
    * 4. If invalid, transition to 'failed'
    */
-  async verify(downloadId: string): Promise<void> {
+  async verify(_downloadId: string): Promise<void> {
     // TODO: Implement
     throw new Error("Not implemented: DownloadEngine.verify");
   }
@@ -93,7 +88,7 @@ export class DownloadEngine {
    * 2. Update series root folder
    * 3. Transition to 'completed'
    */
-  async importDownload(downloadId: string): Promise<void> {
+  async importDownload(_downloadId: string): Promise<void> {
     // TODO: Implement
     throw new Error("Not implemented: DownloadEngine.importDownload");
   }

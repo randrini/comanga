@@ -8,7 +8,6 @@ import {
   LayoutGrid,
   List,
   Plus,
-  SlidersHorizontal,
   Search,
 } from "lucide-react";
 import Link from "next/link";
