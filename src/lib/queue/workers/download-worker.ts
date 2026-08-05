@@ -1,5 +1,5 @@
 import { Worker, Job } from "bullmq";
-import { DOWNLOAD_QUEUE } from "@/lib/queue/queues";
+import { DOWNLOAD_QUEUE, deadLetterQueue } from "@/lib/queue/queues";
 import { ioRedis } from "@/lib/queue/connection";
 
 interface DownloadJobData {
@@ -54,8 +54,18 @@ downloadWorker.on("completed", (job) => {
   console.log(`[download-worker] job ${job.id} completed`);
 });
 
-downloadWorker.on("failed", (job, err) => {
+downloadWorker.on("failed", async (job, err) => {
   console.error(`[download-worker] job ${job?.id} failed:`, err.message);
+  if (job) {
+    await deadLetterQueue.add(
+      `${DOWNLOAD_QUEUE}:${job.name}`,
+      job.data,
+      {
+        jobId: `${DOWNLOAD_QUEUE}:${job.id}`,
+        timestamp: Date.now(),
+      },
+    );
+  }
 });
 
 downloadWorker.on("error", (err) => {

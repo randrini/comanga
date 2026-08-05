@@ -1,5 +1,5 @@
 import { Worker, Job } from "bullmq";
-import { METADATA_QUEUE } from "@/lib/queue/queues";
+import { METADATA_QUEUE, deadLetterQueue } from "@/lib/queue/queues";
 import { ioRedis } from "@/lib/queue/connection";
 
 interface MetadataJobData {
@@ -50,8 +50,18 @@ metadataWorker.on("completed", (job) => {
   console.log(`[metadata-worker] job ${job.id} completed`);
 });
 
-metadataWorker.on("failed", (job, err) => {
+metadataWorker.on("failed", async (job, err) => {
   console.error(`[metadata-worker] job ${job?.id} failed:`, err.message);
+  if (job) {
+    await deadLetterQueue.add(
+      `${METADATA_QUEUE}:${job.name}`,
+      job.data,
+      {
+        jobId: `${METADATA_QUEUE}:${job.id}`,
+        timestamp: Date.now(),
+      },
+    );
+  }
 });
 
 metadataWorker.on("error", (err) => {

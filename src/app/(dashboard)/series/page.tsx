@@ -1,131 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { api } from "@/lib/trpc/react";
 import {
   LayoutGrid,
   List,
   Plus,
   Search,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import type { MediaType } from "@/lib/utils";
 
-// ─── Mock data ───────────────────────────────────────────────────────────────
-
-interface SeriesItem {
-  id: string;
-  title: string;
-  mediaType: MediaType;
-  volumes: number;
-  downloaded: number;
-  monitored: boolean;
-  lastDownloaded: string | null;
-  coverColor: string;
-  year: number;
-  status: "ongoing" | "completed" | "hiatus";
-}
-
-const mockSeries: SeriesItem[] = [
-  {
-    id: "1",
-    title: "One Piece",
-    mediaType: "manga",
-    volumes: 110,
-    downloaded: 110,
-    monitored: true,
-    lastDownloaded: "2026-08-04",
-    coverColor: "#e63946",
-    year: 1997,
-    status: "ongoing",
-  },
-  {
-    id: "2",
-    title: "Berserk",
-    mediaType: "manga",
-    volumes: 42,
-    downloaded: 38,
-    monitored: true,
-    lastDownloaded: "2026-07-28",
-    coverColor: "#1d3557",
-    year: 1989,
-    status: "hiatus",
-  },
-  {
-    id: "3",
-    title: "Solo Leveling",
-    mediaType: "manhwa",
-    volumes: 14,
-    downloaded: 14,
-    monitored: false,
-    lastDownloaded: "2026-06-15",
-    coverColor: "#2a9d8f",
-    year: 2018,
-    status: "completed",
-  },
-  {
-    id: "4",
-    title: "Saga",
-    mediaType: "comic",
-    volumes: 11,
-    downloaded: 9,
-    monitored: true,
-    lastDownloaded: "2026-08-01",
-    coverColor: "#e9c46a",
-    year: 2012,
-    status: "ongoing",
-  },
-  {
-    id: "5",
-    title: "Mushoku Tensei",
-    mediaType: "light_novel",
-    volumes: 26,
-    downloaded: 20,
-    monitored: true,
-    lastDownloaded: "2026-07-30",
-    coverColor: "#264653",
-    year: 2014,
-    status: "ongoing",
-  },
-  {
-    id: "6",
-    title: "Vagabond",
-    mediaType: "manga",
-    volumes: 37,
-    downloaded: 37,
-    monitored: false,
-    lastDownloaded: "2026-05-20",
-    coverColor: "#bc6c25",
-    year: 1998,
-    status: "hiatus",
-  },
-  {
-    id: "7",
-    title: "Invincible",
-    mediaType: "comic",
-    volumes: 25,
-    downloaded: 12,
-    monitored: true,
-    lastDownloaded: "2026-08-03",
-    coverColor: "#003049",
-    year: 2003,
-    status: "completed",
-  },
-  {
-    id: "8",
-    title: "Overlord",
-    mediaType: "light_novel",
-    volumes: 16,
-    downloaded: 16,
-    monitored: true,
-    lastDownloaded: "2026-07-15",
-    coverColor: "#6a4c93",
-    year: 2012,
-    status: "ongoing",
-  },
-];
+// ─── Labels ──────────────────────────────────────────────────────────────────
 
 const mediaTypeLabels: Record<MediaType, string> = {
   manga: "Manga",
@@ -139,27 +31,117 @@ const statusLabels: Record<string, string> = {
   ongoing: "Ongoing",
   completed: "Completed",
   hiatus: "Hiatus",
+  unknown: "Unknown",
 };
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function coverColorFromId(id: string): string {
+  const colors = [
+    "#e63946", "#1d3557", "#2a9d8f", "#e9c46a", "#264653",
+    "#bc6c25", "#003049", "#6a4c93", "#d90429", "#f4a261",
+  ];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+function SeriesGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-lg border border-border overflow-hidden">
+          <Skeleton className="aspect-[3/4] rounded-none" />
+          <div className="p-2.5 space-y-1.5">
+            <Skeleton className="h-3 w-3/4" />
+            <Skeleton className="h-2.5 w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SeriesListSkeleton() {
+  return (
+    <div className="border border-border rounded-lg overflow-hidden">
+      <div className="divide-y divide-border">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+            <Skeleton className="h-8 w-6 rounded-sm shrink-0" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="h-3.5 w-48" />
+              <Skeleton className="h-2.5 w-16" />
+            </div>
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-12" />
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-20" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SeriesPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [mediaFilter, setMediaFilter] = useState<MediaType | "all">("all");
-  const [sortBy, setSortBy] = useState<"title" | "recent" | "progress">(
-    "title",
-  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const filtered = mockSeries
-    .filter((s) => mediaFilter === "all" || s.mediaType === mediaFilter)
-    .sort((a, b) => {
-      if (sortBy === "title") return a.title.localeCompare(b.title);
-      if (sortBy === "recent")
-        return (b.lastDownloaded ?? "").localeCompare(a.lastDownloaded ?? "");
-      return b.downloaded / b.volumes - a.downloaded / a.volumes;
-    });
+  // Read filters from URL search params
+  const viewMode = (searchParams.get("view") as "grid" | "list") ?? "grid";
+  const mediaFilter = (searchParams.get("mediaType") as MediaType | "all") ?? "all";
+  const sortBy = (searchParams.get("sort") as "title" | "recent" | "progress") ?? "title";
 
-  const columns: Column<SeriesItem>[] = [
+  // Local state for select elements (synced to URL on change)
+  const [localSort, setLocalSort] = useState(sortBy);
+  const [localMediaFilter, setLocalMediaFilter] = useState(mediaFilter);
+  const [localViewMode, setLocalViewMode] = useState(viewMode);
+
+  function updateParams(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null || value === "all" || value === "title") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+    const qs = params.toString();
+    router.push(qs ? `?${qs}` : window.location.pathname, { scroll: false });
+  }
+
+  // tRPC query
+  const { data, isLoading, isError, error, refetch } = api.series.list.useQuery({
+    mediaType: mediaFilter !== "all" ? mediaFilter : undefined,
+    limit: 100,
+    offset: 0,
+  });
+
+  // Sort client-side
+  const sorted = useMemo(() => {
+    if (!data?.items) return [];
+    const items = [...data.items];
+    if (sortBy === "title") {
+      items.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "recent") {
+      items.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+    } else if (sortBy === "progress") {
+      // Sort by volume count descending as a proxy for progress
+      items.sort((a, b) => (b.volumeCount ?? 0) - (a.volumeCount ?? 0));
+    }
+    return items;
+  }, [data, sortBy]);
+
+  // ── Columns for list view ──────────────────────────────────────────────────
+
+  const columns: Column<(typeof sorted)[number]>[] = [
     {
       key: "title",
       header: "Title",
@@ -167,13 +149,15 @@ export default function SeriesPage() {
         <div className="flex items-center gap-2.5">
           <div
             className="h-8 w-6 rounded-sm shrink-0"
-            style={{ backgroundColor: row.coverColor }}
+            style={{ backgroundColor: coverColorFromId(row.id) }}
           />
           <div className="min-w-0">
             <div className="text-sm font-medium text-text-primary truncate">
               {row.title}
             </div>
-            <div className="text-xs text-text-muted">{row.year}</div>
+            <div className="text-xs text-text-muted">
+              {row.yearStart ?? "—"}
+            </div>
           </div>
         </div>
       ),
@@ -183,7 +167,9 @@ export default function SeriesPage() {
       header: "Type",
       className: "w-24",
       render: (row) => (
-        <Badge variant="default">{mediaTypeLabels[row.mediaType]}</Badge>
+        <Badge variant="default">
+          {mediaTypeLabels[row.mediaType as MediaType] ?? row.mediaType}
+        </Badge>
       ),
     },
     {
@@ -192,7 +178,7 @@ export default function SeriesPage() {
       className: "w-20",
       render: (row) => (
         <span className="text-text-secondary text-xs">
-          {row.downloaded}/{row.volumes}
+          {row.volumeCount ?? 0}
         </span>
       ),
     },
@@ -207,26 +193,33 @@ export default function SeriesPage() {
       ),
     },
     {
-      key: "lastDownloaded",
-      header: "Last Downloaded",
+      key: "updatedAt",
+      header: "Updated",
       className: "w-36",
       render: (row) => (
         <span className="text-text-muted text-xs">
-          {row.lastDownloaded ?? "Never"}
+          {row.updatedAt
+            ? new Date(row.updatedAt).toLocaleDateString()
+            : "—"}
         </span>
       ),
     },
   ];
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="p-4 lg:p-6">
       {/* Top bar */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-text-primary">Series</h1>
-        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors">
+        <Link
+          href="/search"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+        >
           <Plus className="h-3.5 w-3.5" />
           Add Series
-        </button>
+        </Link>
       </div>
 
       {/* Filters bar */}
@@ -234,9 +227,12 @@ export default function SeriesPage() {
         {/* View toggle */}
         <div className="flex rounded-md border border-border overflow-hidden">
           <button
-            onClick={() => setViewMode("grid")}
+            onClick={() => {
+              setLocalViewMode("grid");
+              updateParams({ view: "grid" });
+            }}
             className={`p-1.5 text-xs transition-colors ${
-              viewMode === "grid"
+              localViewMode === "grid"
                 ? "bg-accent/20 text-accent"
                 : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
             }`}
@@ -244,9 +240,12 @@ export default function SeriesPage() {
             <LayoutGrid className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={() => setViewMode("list")}
+            onClick={() => {
+              setLocalViewMode("list");
+              updateParams({ view: "list" });
+            }}
             className={`p-1.5 text-xs transition-colors ${
-              viewMode === "list"
+              localViewMode === "list"
                 ? "bg-accent/20 text-accent"
                 : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
             }`}
@@ -257,8 +256,12 @@ export default function SeriesPage() {
 
         {/* Sort */}
         <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          value={localSort}
+          onChange={(e) => {
+            const val = e.target.value as typeof sortBy;
+            setLocalSort(val);
+            updateParams({ sort: val });
+          }}
           className="h-7 px-2 text-xs bg-bg-primary border border-border rounded-md text-text-primary focus:outline-none focus:border-accent/50"
         >
           <option value="title">Sort: Title</option>
@@ -268,10 +271,12 @@ export default function SeriesPage() {
 
         {/* Media type filter */}
         <select
-          value={mediaFilter}
-          onChange={(e) =>
-            setMediaFilter(e.target.value as MediaType | "all")
-          }
+          value={localMediaFilter}
+          onChange={(e) => {
+            const val = e.target.value as MediaType | "all";
+            setLocalMediaFilter(val);
+            updateParams({ mediaType: val });
+          }}
           className="h-7 px-2 text-xs bg-bg-primary border border-border rounded-md text-text-primary focus:outline-none focus:border-accent/50"
         >
           <option value="all">All Types</option>
@@ -283,12 +288,37 @@ export default function SeriesPage() {
         </select>
 
         <span className="text-xs text-text-muted ml-auto">
-          {filtered.length} series
+          {data?.total ?? 0} series
         </span>
       </div>
 
       {/* Content */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        localViewMode === "grid" ? (
+          <SeriesGridSkeleton />
+        ) : (
+          <SeriesListSkeleton />
+        )
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="h-16 w-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center mb-4">
+            <RefreshCw className="h-6 w-6 text-text-muted" />
+          </div>
+          <h2 className="text-sm font-medium text-text-primary mb-1">
+            Failed to load series
+          </h2>
+          <p className="text-xs text-text-muted mb-4 max-w-sm">
+            {error?.message ?? "An unexpected error occurred."}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
+      ) : sorted.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="h-16 w-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center mb-4">
             <Search className="h-6 w-6 text-text-muted" />
@@ -300,21 +330,24 @@ export default function SeriesPage() {
             Add your first series to get started. Comanga will automatically
             monitor and download new releases.
           </p>
-          <button className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors">
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-accent text-white rounded-md hover:bg-accent-hover transition-colors"
+          >
             <Plus className="h-4 w-4" />
             Add Your First Series
-          </button>
+          </Link>
         </div>
-      ) : viewMode === "grid" ? (
+      ) : localViewMode === "grid" ? (
         /* Grid view */
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-          {filtered.map((series) => (
+          {sorted.map((series) => (
             <Link key={series.id} href={`/series/${series.id}`}>
               <Card className="group cursor-pointer overflow-hidden">
                 {/* Cover */}
                 <div
                   className="aspect-[3/4] relative"
-                  style={{ backgroundColor: series.coverColor }}
+                  style={{ backgroundColor: coverColorFromId(series.id) }}
                 >
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
@@ -329,23 +362,23 @@ export default function SeriesPage() {
                   {/* Badges */}
                   <div className="absolute top-2 left-2 flex gap-1">
                     <Badge variant="default" className="!bg-black/60 !text-white !border-0">
-                      {mediaTypeLabels[series.mediaType]}
+                      {mediaTypeLabels[series.mediaType as MediaType] ?? series.mediaType}
                     </Badge>
                   </div>
-                  {series.monitored && (
+                  {series.monitored ? (
                     <div className="absolute top-2 right-2">
                       <span className="flex h-2 w-2 rounded-full bg-success" />
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Footer info */}
                 <div className="px-2.5 py-2 flex items-center justify-between">
                   <span className="text-xs text-text-muted">
-                    {series.downloaded}/{series.volumes} vols
+                    {series.volumeCount ?? 0} vols
                   </span>
                   <span className="text-xs text-text-muted">
-                    {statusLabels[series.status]}
+                    {statusLabels[series.status ?? "unknown"]}
                   </span>
                 </div>
               </Card>
@@ -357,10 +390,10 @@ export default function SeriesPage() {
         <div className="border border-border rounded-lg overflow-hidden">
           <DataTable
             columns={columns}
-            data={filtered}
+            data={sorted}
             getRowKey={(row) => row.id}
             onRowClick={(row) => {
-              window.location.href = `/series/${row.id}`;
+              router.push(`/series/${row.id}`);
             }}
           />
         </div>

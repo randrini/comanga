@@ -298,10 +298,45 @@ export interface Conversation {
 }
 
 // ──────────────────────────────────────────────
+// Rate Limiter (simple semaphore)
+// ──────────────────────────────────────────────
+
+class RateLimiter {
+  private maxConcurrent: number;
+  private current = 0;
+  private queue: Array<() => void> = [];
+
+  constructor(maxConcurrent: number) {
+    this.maxConcurrent = maxConcurrent;
+  }
+
+  async acquire(): Promise<void> {
+    if (this.current < this.maxConcurrent) {
+      this.current++;
+      return;
+    }
+    return new Promise<void>((resolve) => {
+      this.queue.push(resolve);
+    });
+  }
+
+  release(): void {
+    if (this.queue.length > 0) {
+      const next = this.queue.shift()!;
+      next();
+    } else {
+      this.current--;
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
 // SLSKD API Client
 // ──────────────────────────────────────────────
 
 export class SlskdClient implements DownloadClient {
+  private searchLimiter = new RateLimiter(1);
+  private downloadLimiter = new RateLimiter(2);
   private baseUrl: string;
   private apiKey: string;
 
@@ -840,33 +875,59 @@ export class SlskdClient implements DownloadClient {
    * This wraps the SLSKD search API and maps results to the generic SearchResult format.
    */
   async search(query: string, _options?: SearchOptions): Promise<SearchResult[]> {
-    const search = await this.createSearch({
-      searchText: query,
-      searchTimeout: 15,
-      responseLimit: 100,
-      fileLimit: 10000,
-    });
+    await this.searchLimiter.acquire();
+    try {
+      const searchTimeout = 15;
+      const search = await this.createSearch({
+        searchText: query,
+        searchTimeout,
+        responseLimit: 100,
+        fileLimit: 10000,
+      });
 
-    // Wait a bit for results to accumulate, then fetch them
-    await new Promise((r) => setTimeout(r, 3000));
+      // Poll for completion
+      const deadline = Date.now() + (searchTimeout + 5) * 1000;
+      let searchWithResponses: SearchRecord;
 
-    const searchWithResponses = await this.getSearch(search.id, true);
-    const responses = searchWithResponses.responses ?? [];
+      while (true) {
+        if (Date.now() > deadline) {
+          throw new Error(`Search timed out after ${searchTimeout + 5}s`);
+        }
 
-    const results: SearchResult[] = [];
-    for (const resp of responses) {
-      for (const file of resp.files) {
-        results.push({
-          title: file.filename.split('\\').pop() ?? file.filename,
-          url: `slsk://${resp.username}/${file.filename}`,
-          fileSize: file.size,
-          source: 'slskd',
-          quality: file.bitRate ? `${file.bitRate}kbps` : undefined,
-        });
+        await new Promise((r) => setTimeout(r, 500));
+        searchWithResponses = await this.getSearch(search.id, true);
+
+        if (searchWithResponses.state === 'Completed') {
+          break;
+        }
+        if (searchWithResponses.state === 'Errored') {
+          throw new Error(`Search errored: ${searchWithResponses.searchText}`);
+        }
+        if (searchWithResponses.state === 'Cancelled') {
+          throw new Error(`Search cancelled: ${searchWithResponses.searchText}`);
+        }
+        // 'InProgress' or 'None' — keep polling
       }
-    }
 
-    return results;
+      const responses = searchWithResponses.responses ?? [];
+
+      const results: SearchResult[] = [];
+      for (const resp of responses) {
+        for (const file of resp.files) {
+          results.push({
+            title: file.filename.split('\\').pop() ?? file.filename,
+            url: `slsk://${resp.username}/${file.filename}`,
+            fileSize: file.size,
+            source: 'slskd',
+            quality: file.bitRate ? `${file.bitRate}kbps` : undefined,
+          });
+        }
+      }
+
+      return results;
+    } finally {
+      this.searchLimiter.release();
+    }
   }
 
   /**
@@ -883,13 +944,18 @@ export class SlskdClient implements DownloadClient {
     const username = match[1];
     const filename = match[2];
 
-    const response = await this.enqueueDownloadBatch({
-      username,
-      files: [{ filename, size: 0 }],
-    });
+    await this.downloadLimiter.acquire();
+    try {
+      const response = await this.enqueueDownloadBatch({
+        username,
+        files: [{ filename, size: 0 }],
+      });
 
-    const batchId = response.batch.id;
-    return batchId;
+      const batchId = response.batch.id;
+      return batchId;
+    } finally {
+      this.downloadLimiter.release();
+    }
   }
 
   /**

@@ -18,6 +18,7 @@ import {
 import type { MediaType, MetadataSource } from "@/types";
 
 // ─── Mock search results ─────────────────────────────────────────────────────
+// TODO: wire to metadata search tRPC
 
 const MOCK_RESULTS: SearchResult[] = [
   {

@@ -1,5 +1,5 @@
 import { Worker, Job } from "bullmq";
-import { MAINTENANCE_QUEUE } from "@/lib/queue/queues";
+import { MAINTENANCE_QUEUE, deadLetterQueue } from "@/lib/queue/queues";
 import { ioRedis } from "@/lib/queue/connection";
 
 interface MaintenanceJobData {
@@ -48,8 +48,18 @@ maintenanceWorker.on("completed", (job) => {
   console.log(`[maintenance-worker] job ${job.id} completed`);
 });
 
-maintenanceWorker.on("failed", (job, err) => {
+maintenanceWorker.on("failed", async (job, err) => {
   console.error(`[maintenance-worker] job ${job?.id} failed:`, err.message);
+  if (job) {
+    await deadLetterQueue.add(
+      `${MAINTENANCE_QUEUE}:${job.name}`,
+      job.data,
+      {
+        jobId: `${MAINTENANCE_QUEUE}:${job.id}`,
+        timestamp: Date.now(),
+      },
+    );
+  }
 });
 
 maintenanceWorker.on("error", (err) => {

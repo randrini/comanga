@@ -31,6 +31,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm test
+
   build-arm64:
     name: Build (arm64)
     needs: lint-and-typecheck

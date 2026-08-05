@@ -42,7 +42,7 @@ export const volume = sqliteTable(
     id: text("id").primaryKey(),
     seriesId: text("series_id")
       .notNull()
-      .references(() => series.id),
+      .references(() => series.id, { onDelete: "cascade" }),
     volumeNumber: integer("volume_number").notNull(),
     title: text("title"),
     coverUrl: text("cover_url"),
@@ -65,8 +65,8 @@ export const chapter = sqliteTable(
     id: text("id").primaryKey(),
     seriesId: text("series_id")
       .notNull()
-      .references(() => series.id),
-    volumeId: text("volume_id").references(() => volume.id),
+      .references(() => series.id, { onDelete: "cascade" }),
+    volumeId: text("volume_id").references(() => volume.id, { onDelete: "cascade" }),
     chapterNumber: real("chapter_number"),
     title: text("title"),
     pages: integer("pages"),
@@ -88,9 +88,9 @@ export const download = sqliteTable(
     id: text("id").primaryKey(),
     seriesId: text("series_id")
       .notNull()
-      .references(() => series.id),
-    volumeId: text("volume_id").references(() => volume.id),
-    chapterId: text("chapter_id").references(() => chapter.id),
+      .references(() => series.id, { onDelete: "cascade" }),
+    volumeId: text("volume_id").references(() => volume.id, { onDelete: "cascade" }),
+    chapterId: text("chapter_id").references(() => chapter.id, { onDelete: "cascade" }),
     status: text("status").notNull().default("pending"), // pending|searching|downloading|verifying|importing|completed|failed|awaiting_release|stalled|blocked|manual_search
     downloaderType: text("downloader_type").notNull(), // slskd|prowlarr_torrent|prowlarr_usenet|getcomics|comicscode
     downloadUrl: text("download_url"),
@@ -125,7 +125,7 @@ export const downloadSource = sqliteTable(
     id: text("id").primaryKey(),
     downloadId: text("download_id")
       .notNull()
-      .references(() => download.id),
+      .references(() => download.id, { onDelete: "cascade" }),
     downloaderType: text("downloader_type").notNull(),
     title: text("title").notNull(),
     url: text("url").notNull(),
@@ -169,7 +169,7 @@ export const blocklist = sqliteTable(
     id: text("id").primaryKey(),
     seriesId: text("series_id")
       .notNull()
-      .references(() => series.id),
+      .references(() => series.id, { onDelete: "cascade" }),
     title: text("title"),
     downloaderType: text("downloader_type"),
     reason: text("reason"),
