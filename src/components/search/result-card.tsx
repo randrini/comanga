@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { CoverPlaceholder } from "@/components/ui/cover-placeholder";
 import { Plus, Check } from "lucide-react";
 import type { MediaType, MetadataSource, SeriesStatus } from "@/types";
 
@@ -59,32 +60,6 @@ export interface SearchResult {
   metadataId: string;
 }
 
-// ─── Cover placeholder ───────────────────────────────────────────────────────
-
-function CoverPlaceholder({
-  title,
-  color,
-  className,
-}: {
-  title: string;
-  color: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center shrink-0 rounded-lg",
-        className,
-      )}
-      style={{ backgroundColor: color }}
-    >
-      <span className="text-white/80 font-bold text-lg select-none leading-none">
-        {title.charAt(0).toUpperCase()}
-      </span>
-    </div>
-  );
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 interface ResultCardProps {
@@ -99,8 +74,9 @@ export function ResultCard({ result, added = false, onAdd }: ResultCardProps) {
       {/* Cover */}
       <CoverPlaceholder
         title={result.title}
-        color={result.coverColor}
-        className="h-[80px] w-[58px]"
+        mediaType={MEDIA_TYPE_LABELS[result.mediaType]}
+        seed={result.metadataId}
+        className="h-[80px] w-[58px] shrink-0 rounded-lg"
       />
 
       {/* Info */}

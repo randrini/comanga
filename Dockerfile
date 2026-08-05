@@ -31,7 +31,6 @@ COPY --from=builder /app/.next/standalone ./
 
 # Copy static assets (needed by standalone output)
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
 # Copy database init script and entrypoint
 COPY scripts/init-db.mjs ./scripts/init-db.mjs

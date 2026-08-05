@@ -6,12 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { CoverPlaceholder } from "@/components/ui/cover-placeholder";
 import { api } from "@/lib/trpc/react";
 import {
   LayoutGrid,
   List,
   Plus,
-  Search,
   RefreshCw,
   BookOpen,
 } from "lucide-react";
@@ -34,20 +34,6 @@ const statusLabels: Record<string, string> = {
   hiatus: "Hiatus",
   unknown: "Unknown",
 };
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function coverColorFromId(id: string): string {
-  const colors = [
-    "#e63946", "#1d3557", "#2a9d8f", "#e9c46a", "#264653",
-    "#bc6c25", "#003049", "#6a4c93", "#d90429", "#f4a261",
-  ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 
@@ -147,14 +133,11 @@ export default function SeriesPage() {
       header: "Title",
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div
-            className="h-9 w-7 rounded-md shrink-0 flex items-center justify-center"
-            style={{ backgroundColor: coverColorFromId(row.id) }}
-          >
-            <span className="text-white/80 font-bold text-[10px] select-none leading-none">
-              {row.title.charAt(0)}
-            </span>
-          </div>
+          <CoverPlaceholder
+            title={row.title}
+            seed={row.id}
+            className="h-9 w-7 rounded-md shrink-0"
+          />
           <div className="min-w-0">
             <div className="text-sm font-medium text-text-primary truncate">
               {row.title}
@@ -349,10 +332,14 @@ export default function SeriesPage() {
             <Link key={series.id} href={`/series/${series.id}`}>
               <Card className="group cursor-pointer overflow-hidden h-full">
                 {/* Cover */}
-                <div
-                  className="aspect-[3/4] relative"
-                  style={{ backgroundColor: coverColorFromId(series.id) }}
-                >
+                <div className="aspect-[3/4] relative">
+                  <CoverPlaceholder
+                    title={series.title}
+                    mediaType={mediaTypeLabels[series.mediaType as MediaType] ?? series.mediaType}
+                    seed={series.id}
+                    className="absolute inset-0"
+                  />
+
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 

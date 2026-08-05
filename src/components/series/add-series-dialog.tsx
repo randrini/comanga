@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CoverPlaceholder } from "@/components/ui/cover-placeholder";
 import { X } from "lucide-react";
 import type { MediaType, MonitorType } from "@/types";
 import type { SearchResult } from "@/components/search/result-card";
@@ -112,6 +113,16 @@ export function AddSeriesDialog({
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Cover preview */}
+            <div className="flex justify-center">
+              <CoverPlaceholder
+                title={title || series.title}
+                mediaType={MEDIA_TYPE_LABELS[mediaType]}
+                seed={series.metadataId}
+                className="w-28 h-36 rounded-lg shadow-elevated"
+              />
+            </div>
+
             {/* Title */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-secondary">

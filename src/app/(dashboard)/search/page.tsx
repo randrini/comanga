@@ -13,7 +13,6 @@ import {
   Search,
   LayoutGrid,
   List,
-  Library,
   BookOpen,
 } from "lucide-react";
 import type { MediaType, MetadataSource } from "@/types";

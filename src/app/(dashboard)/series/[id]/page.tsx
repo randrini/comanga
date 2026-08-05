@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CoverPlaceholder } from "@/components/ui/cover-placeholder";
 import { api } from "@/lib/trpc/react";
 import {
   ArrowLeft,
@@ -113,18 +114,6 @@ const tabs: { key: Tab; label: string }[] = [
   { key: "downloads", label: "Downloads" },
   { key: "history", label: "History" },
 ];
-
-function coverColorFromId(id: string): string {
-  const colors = [
-    "#e63946", "#1d3557", "#2a9d8f", "#e9c46a", "#264653",
-    "#bc6c25", "#003049", "#6a4c93", "#d90429", "#f4a261",
-  ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 
@@ -274,14 +263,13 @@ export default function SeriesDetailPage() {
       {/* Series header — hero section */}
       <div className="flex gap-5 mb-6">
         {/* Cover */}
-        <div
-          className="hidden sm:block w-36 h-48 rounded-xl shrink-0 relative overflow-hidden shadow-elevated"
-          style={{ backgroundColor: coverColorFromId(series.id) }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <BookOpen className="h-8 w-8 text-white/20" />
-          </div>
+        <div className="hidden sm:block w-36 h-48 rounded-xl shrink-0 relative overflow-hidden shadow-elevated">
+          <CoverPlaceholder
+            title={series.title}
+            mediaType={mediaTypeLabels[series.mediaType as MediaType] ?? series.mediaType}
+            seed={series.id}
+            className="absolute inset-0"
+          />
         </div>
 
         {/* Info */}
@@ -395,10 +383,14 @@ export default function SeriesDetailPage() {
             return (
               <Card key={vol.id} className="group cursor-pointer overflow-hidden">
                 {/* Volume cover */}
-                <div
-                  className="aspect-[3/4] relative"
-                  style={{ backgroundColor: coverColorFromId(vol.id) }}
-                >
+                <div className="aspect-[3/4] relative">
+                  <CoverPlaceholder
+                    title={vol.title ?? `Volume ${vol.volumeNumber}`}
+                    volumeNumber={vol.volumeNumber}
+                    mediaType={mediaTypeLabels[series.mediaType as MediaType] ?? series.mediaType}
+                    seed={`${series.id}-vol-${vol.volumeNumber}`}
+                    className="absolute inset-0"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <div className="text-sm font-semibold text-white">

@@ -52,7 +52,7 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-border/30">
-          {data.map((row, index) => (
+          {data.map((row, _index) => (
             <tr
               key={getRowKey(row)}
               onClick={() => onRowClick?.(row)}
